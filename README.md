@@ -6,7 +6,8 @@ Create a Python virtualenv with interpreter version 2.7 or later on your UNIX sy
 
 ### Dependency Installation
 
-If you are on a Linux system, you may need to run `apt-get install libfreetype6-dev python-dev python-matplotlib`. Install all dependencies by running `pip install -r requirements.txt`.  
+If you are on a Linux system, you may need to run `apt-get install libfreetype6-dev python-dev tcl-dev tk-dev
+ python-matplotlib`. Install all dependencies by running `pip install -r requirements.txt`.  
 
 ### Output
 
