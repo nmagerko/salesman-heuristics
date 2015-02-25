@@ -23,32 +23,6 @@ def get_nearest_neighbor_edges(node, requested=1):
 
     return (sorted_edges[0:requested], sorted_edges[requested:])
 
-# def determine_best_neighbor_edge(edges):
-#     """
-#     I'll need to make this method a bit clearer
-#     Essentially, it takes the edges we're considering, and determines
-#     which one is the best edge to take. Assume this works for now
-#     """
-#     neighbor_prediction_weights = []
-#     for edge in edges:
-#         outcome_path = []
-#         # get the neighbor in question out of the tuple (x)
-#         potential_neighbor = edge[1]
-#         outcome_path.append(edge)
-#         # find its shortest edge (need to get edge out of list AND tuple)
-#         nearest_edge1 = get_nearest_neighbor_edges(potential_neighbor, outcome_path)[0][0]
-#         outcome_path.append(nearest_edge1)
-#         # get the new neighbor out of the previous edge
-#         potential_neighbor1 = nearest_edge1[1]
-#         # get the shortest edge of this new neighbor
-#         nearest_edge2 = get_nearest_neighbor_edges(potential_neighbor1, outcome_path)[0][0]
-#         outcome_path.append(nearest_edge2)
-#         neighbor_prediction_weights.append({ 'edge' : edge,
-#                                             'weight' : utils.total_weight(outcome_path)})
-# 
-#     sorted_weights = sorted(neighbor_prediction_weights, key=lambda edge: edge['weight'])
-#     return (sorted_weights[0], sorted_weights[1:])
-
 def draw_solution():
     """
     Draws the solution graph
@@ -78,7 +52,7 @@ def solve_salesman_problem():
         
     for node in graph.nodes():
         initial_city = visited_cities[0]
-        if graph.degree(node) != 2  and node != initial_city:
+        if graph.degree(node) == 1  and node != initial_city:
             visited_cities.append(node)
             print("FINAL CITY: " + node)
             graph.add_edge(initial_city, node)
