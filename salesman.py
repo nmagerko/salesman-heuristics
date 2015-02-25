@@ -4,14 +4,27 @@ import networkx as nx
 import utils
 
 # the number of cities on our itinerary
-CITIES = 19
+CITIES = 16
+# the number of alternative nearest neighbors to check
+ALTERNATIVES = 3
+# the number of nodes we want to work ahead
+PREDICTION_CAP = 5
 
 # get a random subgraph of the full cities graph
 graph = utils.random_city_subgraph(cities.get_city_graph_safely(), CITIES)
 # keep track of which edges we've included in our solution
 visited_cities = []
 
-def get_nearest_neighbor_edges(node, requested=1):
+def clean_edge_list(edge_list, extra=[]):
+    """
+    Removes any edges that would involve moving backwards
+    along the solution
+    """
+    return [edge for edge in edge_list if edge[1] not in visited_cities \
+            and edge[1] not in extra]
+    
+
+def get_nearest_neighbor_edges(node, requested=1, traveled=[]):
     """
     Returns a tuple containing (a list of [number_to_return] nearest neighbors,
     and a list of the remaining edges)
@@ -19,35 +32,35 @@ def get_nearest_neighbor_edges(node, requested=1):
     incident_edges = graph.edges(node, data=True)
     sorted_edges = sorted(incident_edges, key=lambda edge: edge[2]['weight'])
     # Don't go to cities that we've visited (the second city in the edge)
-    sorted_edges = [edge for edge in sorted_edges if edge[1] not in visited_cities]
+    sorted_edges = clean_edge_list(sorted_edges, extra=traveled)
 
     return (sorted_edges[0:requested], sorted_edges[requested:])
 
-# def determine_best_neighbor_edge(edges):
-#     """
-#     I'll need to make this method a bit clearer
-#     Essentially, it takes the edges we're considering, and determines
-#     which one is the best edge to take. Assume this works for now
-#     """
-#     neighbor_prediction_weights = []
-#     for edge in edges:
-#         outcome_path = []
-#         # get the neighbor in question out of the tuple (x)
-#         potential_neighbor = edge[1]
-#         outcome_path.append(edge)
-#         # find its shortest edge (need to get edge out of list AND tuple)
-#         nearest_edge1 = get_nearest_neighbor_edges(potential_neighbor, outcome_path)[0][0]
-#         outcome_path.append(nearest_edge1)
-#         # get the new neighbor out of the previous edge
-#         potential_neighbor1 = nearest_edge1[1]
-#         # get the shortest edge of this new neighbor
-#         nearest_edge2 = get_nearest_neighbor_edges(potential_neighbor1, outcome_path)[0][0]
-#         outcome_path.append(nearest_edge2)
-#         neighbor_prediction_weights.append({ 'edge' : edge,
-#                                             'weight' : utils.total_weight(outcome_path)})
-# 
-#     sorted_weights = sorted(neighbor_prediction_weights, key=lambda edge: edge['weight'])
-#     return (sorted_weights[0], sorted_weights[1:])
+def determine_best_neighbor_edge(potential_edges):
+    neighbor_prediction_weights = []
+    for edge in potential_edges:
+        outcome_path = []
+        outcome_nodes = []
+        
+        outcome_path.append(edge)
+        potential_neighbor = edge[1]
+        outcome_nodes.append(potential_neighbor)
+        
+        for predictions in range(0, PREDICTION_CAP):
+            nearest_edge_list = get_nearest_neighbor_edges(node=outcome_nodes[-1], traveled=outcome_nodes)
+            if nearest_edge_list[0]:
+                next_edge = nearest_edge_list[0][0]
+                outcome_path.append(next_edge)
+                next_node = next_edge[1]
+                outcome_nodes.append(next_node)
+            
+        neighbor_prediction_weights.append({ 'edge': edge,
+                                             'weight': utils.total_weight(outcome_path) })
+        
+    sorted_weights = sorted(neighbor_prediction_weights, key=lambda edge: edge['weight'])
+    sorted_weights = [prediction_weight['edge'] for prediction_weight in sorted_weights]
+    
+    return (sorted_weights[0], sorted_weights[1:])
 
 def draw_solution():
     """
@@ -69,16 +82,18 @@ def solve_salesman_problem():
     while len(visited_cities) < CITIES - 2:
         # get the possible edges to take, and the ones we can remove
         visited_cities.append(current_city)
-        nearest_edge, rmv = get_nearest_neighbor_edges(current_city)
-        nearest_edge = nearest_edge[0]
+        nearest_edges, rmv = get_nearest_neighbor_edges(current_city, ALTERNATIVES)
+        graph.remove_edges_from(rmv)
+        
+        best_edge, rmv = determine_best_neighbor_edge(nearest_edges)
         graph.remove_edges_from(rmv)
 
-        current_city = nearest_edge[1]
+        current_city = best_edge[1]
         print("NEXT CITY: " + current_city)
         
     for node in graph.nodes():
         initial_city = visited_cities[0]
-        if graph.degree(node) != 2  and node != initial_city:
+        if graph.degree(node) == 1  and node != initial_city:
             visited_cities.append(node)
             print("FINAL CITY: " + node)
             graph.add_edge(initial_city, node)
