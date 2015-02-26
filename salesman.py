@@ -128,18 +128,21 @@ def find_closest_outer_edge(inner_node):
     closest_edge = None
     shortest_dist = None
     for edge in visited_edges:
-        # distance_to_edge_center = utils.distance(city_positions[inner_node], edge_center_position)
-        distance_to_edge_center = utils.find_shortest_distance(edge, city_positions[inner_node])
-        if shortest_dist is None or distance_to_edge_center< shortest_dist:
-            shortest_dist = distance_to_edge_center
+        distance_to_edge = utils.find_shortest_distance(edge, city_positions[inner_node])
+        if shortest_dist is None or distance_to_edge < shortest_dist:
+            shortest_dist = distance_to_edge
             closest_edge = edge
     return closest_edge
 
 def find_closest_inner_vertex(outer_edge):
+    """
+    Finds the closest inner vertex inside the existing circuit
+    to the given circuit edge
+    """
     closest_vertex = None
     shortest_dist = None
+    #compare all inner vertices
     for inner_node in [node for node in graph.nodes() if node not in visited_cities]:
-        # distance_to_edge_center = utils.distance(city_positions[inner_node], edge_center_position)
         distance_to_edge = utils.find_shortest_distance(outer_edge, city_positions[inner_node])
         if shortest_dist is None or distance_to_edge < shortest_dist:
             shortest_dist = distance_to_edge
@@ -147,6 +150,9 @@ def find_closest_inner_vertex(outer_edge):
     return closest_vertex, shortest_dist
 
 def solve_salesman():
+    """
+    Perform the algorithm, presenting the resulting solution plot at finish.
+    """
     global visited_edges
     # select the first node
     current_city = find_most_western_vertex()
@@ -156,21 +162,30 @@ def solve_salesman():
     # continue if we haven't visited any cities, or if we haven't
     # formed the outer circuit
     while len(visited_cities) == 0 or current_city!=visited_cities[0]:
-        # get the possible edges to take, and the ones we can remove
         visited_cities.append(current_city)
-
+        
+        # get the possible edges to take, and the ones we can remove
         best_edge, rmv = determine_best_radial_neighbor(current_city)
         if len(visited_cities) > 1:
             graph.remove_edges_from(rmv)
         else:
+            # Keep the initial city's edges for now;
+            # we don't want to remove the last edge 
+            # of the circuit by mistake
             initial_city_nearest_edges=rmv
 
         current_city = best_edge[1]
         visited_edges.append(best_edge)
         print("NEXT CITY: " + current_city)
+    # Now that we found the final circuit edge, remove the edges of the first city that we saved.
     graph.remove_edges_from([rmv for rmv in initial_city_nearest_edges if  rmv[1] != visited_cities[1] \
     and rmv[1]!= visited_cities[-1]])
+    # Also, remove the edges of all of the inner vertices. They're unimportant now.
+    for vertex in graph.nodes():
+        if vertex not in visited_cities:
+            graph.remove_edges_from(graph.edges(vertex))
     
+    # Connect the inner vertices
     while len(visited_cities) < CITIES: 
         next_nearest_vertex = None
         shortest_dist = None
@@ -190,6 +205,7 @@ def solve_salesman():
         visited_edges.append((next_nearest_vertex, u))
         visited_edges.append((next_nearest_vertex, v))
         visited_cities.append(next_nearest_vertex)
+        draw_solution()
 
     draw_solution()
     
