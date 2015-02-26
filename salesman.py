@@ -6,7 +6,7 @@ from matplotlib.cbook import Null
 import math
 
 # the number of cities on our itinerary
-CITIES = 16
+CITIES = 40
 # the number of alternative nearest neighbors to check
 ALTERNATIVES = 3
 # the number of nodes we want to work ahead
@@ -16,6 +16,8 @@ PREDICTION_CAP = 10
 graph = utils.random_city_subgraph(cities.get_city_graph_safely(), CITIES)
 # keep track of which edges we've included in our solution
 visited_cities = []
+
+visited_edges = []
 
 city_positions = cities.get_city_positions_safely();
 
@@ -164,27 +166,26 @@ def find_extreme_vertex():
 def average_position(node1, node2):
     position1 = city_positions[node1]
     position2 = city_positions[node2]
-    new_position = [(position1[0]+position2[0])/2,(position1[1]+position2[1])/2];
+    new_position = ((position1[0]+position2[0])/2,(position1[1]+position2[1])/2);
     return new_position;
     
 def find_closest_outer_edge(inner_node):
     closest_edge = None;
     shortest_dist = None;
-    for  i in range(len(visited_cities)):
-        if i < len(visited_cities)-1:
-            edge_center_position = average_position(visited_cities[i],visited_cities[i+1])
-        else:
-            edge_center_position= average_position(visited_cities[i],visited_cities[0])
+    for edge in visited_edges:
+        edge_center_position = average_position(edge[0],edge[1])
         distance_to_edge_center = utils.distance(city_positions[inner_node], edge_center_position);
         if shortest_dist is None or distance_to_edge_center< shortest_dist:
             shortest_dist = distance_to_edge_center
-            
+            closest_edge = edge;
+    return closest_edge;
 
 def solve_salesman_radially():
     """
     Solves the problem
     @author: jreynolds
     """
+    global visited_edges
     # select the first node
     current_city = find_extreme_vertex();
     print("INITIAL CITY: " + current_city)
@@ -202,9 +203,21 @@ def solve_salesman_radially():
             initial_city_nearest_edges=rmv;
 
         current_city = best_edge[1]
+        visited_edges.append(best_edge)
         print("NEXT CITY: " + current_city)
     graph.remove_edges_from([rmv for rmv in initial_city_nearest_edges if  rmv[1] != visited_cities[1] \
     and rmv[1]!= visited_cities[len(visited_cities)-1]])
+    
+    for inner_node in [node for node in graph.nodes() if node not in visited_cities]:
+        u, v = find_closest_outer_edge(inner_node)
+        print(u, v)
+        graph.remove_edge(v, u)
+        visited_edges = [edge for edge in visited_edges if edge != (u, v) and edge != (v, u)]
+        graph.remove_edges_from(graph.edges(inner_node))
+        graph.add_edge(inner_node, u)
+        graph.add_edge(inner_node, v)
+        visited_edges.append((inner_node, u))
+        visited_edges.append((inner_node, v))
     
     
 #     for node in graph.nodes():
