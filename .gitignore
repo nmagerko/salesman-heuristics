@@ -54,6 +54,8 @@ docs/_build/
 
 # PyBuilder
 target/
+*.project
+*.pydevproject
 
 # Our output
 output/
