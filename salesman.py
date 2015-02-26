@@ -149,6 +149,12 @@ def find_closest_inner_vertex(outer_edge):
             closest_vertex = inner_node
     return closest_vertex, shortest_dist
 
+def choose_best_edge_deformation(edge_array, inner_vertex):
+    """
+    In an array of edges in which the distance to an inner_vertex 
+    is the same, find the minimal-distance deformation edge
+    """
+
 def solve_salesman():
     """
     Perform the algorithm, presenting the resulting solution plot at finish.
@@ -190,12 +196,26 @@ def solve_salesman():
         next_nearest_vertex = None
         shortest_dist = None
         deformed_edge = None
+        equal_edges = []
         for edge in visited_edges:
+            
             vertex, dist = find_closest_inner_vertex(edge);
-            if shortest_dist is None or dist < shortest_dist:
-                next_nearest_vertex = vertex
-                shortest_dist = dist
-                deformed_edge = edge
+            if shortest_dist is None or dist <= shortest_dist:
+                # check if two edges have the same nearest vertex at 
+                # the same distance. AKA they are sharing an endpoint 
+                # which is closest to the vertex
+                if dist == shortest_dist and vertex == next_nearest_vertex:
+                    #add the two neighboring edges to an array
+                    equal_edges.append(deformed_edge)
+                    equal_edges.append(edge)
+                else:
+                    next_nearest_vertex = vertex
+                    shortest_dist = dist
+                    equal_edges = []
+                    deformed_edge = edge
+        # if there are equal edges
+        if equal_edges:
+            deformed_edge = choose_best_edge_deformation(equal_edges, next_nearest_vertex) 
         u, v = deformed_edge
         graph.remove_edge(v, u)
         visited_edges = [edge for edge in visited_edges if edge != (u, v) and edge != (v, u)]
