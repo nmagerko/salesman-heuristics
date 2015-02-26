@@ -9,7 +9,7 @@ import sys
 if len(sys.argv) > 1:
     CITIES = int(sys.argv[1])
 else:
-    CITIES = 50
+    CITIES = 55
 
 # get a random subgraph of the full cities graph
 graph = utils.random_city_subgraph(cities.get_city_graph_safely(), CITIES)
@@ -54,7 +54,7 @@ def findAngle(node1, node2):
             quadrant = 3
     elif delta_y < 0 :
         quadrant = 4
-        
+        64
     # get the inverse tangent of [opposite/adjacent],
     # correcting angle based on quadrant
     theta = math.degrees(math.atan(delta_y/delta_x))
@@ -149,24 +149,28 @@ def find_closest_inner_vertex(outer_edge):
             closest_vertex = inner_node
     return closest_vertex, shortest_dist
 
-def choose_best_edge_deformation(edge_array, inner_vertex):
+def choose_best_edge_deformation(inner_vertex):
     """
-    In an array of edges in which the distance to an inner_vertex 
-    is the same, find the minimal-distance deformation edge
+    In a list of edges, find the minimal-distance edge-deformation for a vertex 
     """
     best_dist = None
     best_edge = None
-    for edge in edge_array:
+    for edge in visited_edges:
+        # the positions of the two vertices of the edge
         P1 = city_positions[edge[0]]
         P2 = city_positions[edge[1]]
+        # the inner vertex position
         V = city_positions[inner_vertex]
+        # find the distance between the two points of the edge
         original_dist = utils.distance(P1, P2)
+        # find the sum of the distances between the inner vertex and the edge's vertices
         new_dist = utils.distance(P1, V) + utils.distance(P2, V)
+        # find the change in distance after deformation
         delta_dist = new_dist - original_dist
         if best_dist is None or delta_dist < best_dist:
             best_dist = delta_dist
             best_edge = edge
-    return best_edge
+    return best_edge, best_dist
         
 def solve_salesman():
     """
@@ -206,38 +210,29 @@ def solve_salesman():
     
     # Connect the inner vertices
     while len(visited_cities) < CITIES: 
-        next_nearest_vertex = None
+        next_best_vertex = None
         shortest_dist = None
         deformed_edge = None
-        equal_edges = []
-        for edge in visited_edges:
-            
-            vertex, dist = find_closest_inner_vertex(edge);
-            if shortest_dist is None or dist <= shortest_dist:
-                # check if two edges have the same nearest vertex at 
-                # the same distance. AKA they are sharing an endpoint 
-                # which is closest to the vertex
-                if dist == shortest_dist and vertex == next_nearest_vertex:
-                    #add the two neighboring edges to an array
-                    equal_edges.append(deformed_edge)
-                    equal_edges.append(edge)
-                else:
-                    next_nearest_vertex = vertex
-                    shortest_dist = dist
-                    equal_edges = []
-                    deformed_edge = edge
-        # if there are equal edges
-        if equal_edges:
-            deformed_edge = choose_best_edge_deformation(equal_edges, next_nearest_vertex) 
+        # find the best edge deformation for each vertex and compare.
+        # The smallest change in distance for an edge deformation is the best choice
+        for inner_vertex in [node for node in graph.nodes() if node not in visited_cities]:
+            edge, dist = choose_best_edge_deformation(inner_vertex)
+            if shortest_dist is None or dist < shortest_dist:
+                shortest_dist = dist
+                next_best_vertex = inner_vertex
+                deformed_edge = edge
         u, v = deformed_edge
+        # remove the edge we are going to deform
         graph.remove_edge(v, u)
+        # remove it from the visited edges as well
         visited_edges = [edge for edge in visited_edges if edge != (u, v) and edge != (v, u)]
-        graph.remove_edges_from(graph.edges(next_nearest_vertex))
-        graph.add_edge(next_nearest_vertex, u)
-        graph.add_edge(next_nearest_vertex, v)
-        visited_edges.append((next_nearest_vertex, u))
-        visited_edges.append((next_nearest_vertex, v))
-        visited_cities.append(next_nearest_vertex)
+        # add the edges that occur from the edge deformation
+        graph.add_edge(next_best_vertex, u)
+        graph.add_edge(next_best_vertex, v)
+        visited_edges.append((next_best_vertex, u))
+        visited_edges.append((next_best_vertex, v))
+        # add the new vertex to our visited cities
+        visited_cities.append(next_best_vertex)
 
     draw_solution()
     
