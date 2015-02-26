@@ -82,6 +82,8 @@ def draw_solution():
     """
     city_positions = cities.get_city_positions_safely()
     nx.draw_networkx(graph, pos=city_positions, with_labels=True)
+    mng = plt.get_current_fig_manager()
+    mng.resize(*mng.window.maxsize())
     plt.show()
 
 def solve_salesman_problem():
@@ -178,13 +180,23 @@ def find_closest_outer_edge(inner_node):
     closest_edge = None
     shortest_dist = None
     for edge in visited_edges:
-        edge_center_position = average_position(edge[0],edge[1])
         # distance_to_edge_center = utils.distance(city_positions[inner_node], edge_center_position)
         distance_to_edge_center = utils.find_shortest_distance(edge, city_positions[inner_node])
         if shortest_dist is None or distance_to_edge_center< shortest_dist:
             shortest_dist = distance_to_edge_center
             closest_edge = edge
     return closest_edge
+
+def find_closest_inner_vertex(outer_edge):
+    closest_vertex = None
+    shortest_dist = None
+    for inner_node in [node for node in graph.nodes() if node not in visited_cities]:
+        # distance_to_edge_center = utils.distance(city_positions[inner_node], edge_center_position)
+        distance_to_edge = utils.find_shortest_distance(outer_edge, city_positions[inner_node])
+        if shortest_dist is None or distance_to_edge < shortest_dist:
+            shortest_dist = distance_to_edge
+            closest_vertex = inner_node
+    return closest_vertex, shortest_dist
 
 def solve_salesman_radially():
     """
@@ -213,17 +225,38 @@ def solve_salesman_radially():
         print("NEXT CITY: " + current_city)
     graph.remove_edges_from([rmv for rmv in initial_city_nearest_edges if  rmv[1] != visited_cities[1] \
     and rmv[1]!= visited_cities[len(visited_cities)-1]])
-
-    for inner_node in [node for node in graph.nodes() if node not in visited_cities]:
-        u, v = find_closest_outer_edge(inner_node)
+    
+    while len(visited_cities) < CITIES: 
+        next_nearest_vertex = None
+        shortest_dist = None
+        deformed_edge = None
+        for edge in visited_edges:
+            vertex, dist = find_closest_inner_vertex(edge);
+            if shortest_dist is None or dist < shortest_dist:
+                next_nearest_vertex = vertex
+                shortest_dist = dist
+                deformed_edge = edge
+        u, v = deformed_edge
         print(u, v)
         graph.remove_edge(v, u)
         visited_edges = [edge for edge in visited_edges if edge != (u, v) and edge != (v, u)]
-        graph.remove_edges_from(graph.edges(inner_node))
-        graph.add_edge(inner_node, u)
-        graph.add_edge(inner_node, v)
-        visited_edges.append((inner_node, u))
-        visited_edges.append((inner_node, v))
+        graph.remove_edges_from(graph.edges(next_nearest_vertex))
+        graph.add_edge(next_nearest_vertex, u)
+        graph.add_edge(next_nearest_vertex, v)
+        visited_edges.append((next_nearest_vertex, u))
+        visited_edges.append((next_nearest_vertex, v))
+        visited_cities.append(next_nearest_vertex)
+            
+#     for inner_node in [node for node in graph.nodes() if node not in visited_cities]:
+#         u, v = find_closest_outer_edge(inner_node)
+#         print(u, v)
+#         graph.remove_edge(v, u)
+#         visited_edges = [edge for edge in visited_edges if edge != (u, v) and edge != (v, u)]
+#         graph.remove_edges_from(graph.edges(inner_node))
+#         graph.add_edge(inner_node, u)
+#         graph.add_edge(inner_node, v)
+#         visited_edges.append((inner_node, u))
+#         visited_edges.append((inner_node, v))
 
 
 #     for node in graph.nodes():
