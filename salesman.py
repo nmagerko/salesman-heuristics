@@ -9,7 +9,7 @@ import sys
 if len(sys.argv) > 1:
     CITIES = int(sys.argv[1])
 else:
-    CITIES = 40
+    CITIES = 50
 
 # get a random subgraph of the full cities graph
 graph = utils.random_city_subgraph(cities.get_city_graph_safely(), CITIES)
@@ -154,7 +154,20 @@ def choose_best_edge_deformation(edge_array, inner_vertex):
     In an array of edges in which the distance to an inner_vertex 
     is the same, find the minimal-distance deformation edge
     """
-
+    best_dist = None
+    best_edge = None
+    for edge in edge_array:
+        P1 = city_positions[edge[0]]
+        P2 = city_positions[edge[1]]
+        V = city_positions[inner_vertex]
+        original_dist = utils.distance(P1, P2)
+        new_dist = utils.distance(P1, V) + utils.distance(P2, V)
+        delta_dist = new_dist - original_dist
+        if best_dist is None or delta_dist < best_dist:
+            best_dist = delta_dist
+            best_edge = edge
+    return best_edge
+        
 def solve_salesman():
     """
     Perform the algorithm, presenting the resulting solution plot at finish.
@@ -225,7 +238,6 @@ def solve_salesman():
         visited_edges.append((next_nearest_vertex, u))
         visited_edges.append((next_nearest_vertex, v))
         visited_cities.append(next_nearest_vertex)
-        draw_solution()
 
     draw_solution()
     
