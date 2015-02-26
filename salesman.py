@@ -9,10 +9,10 @@ import sys
 if len(sys.argv) > 1:
     CITIES = int(sys.argv[1])
 else:
-    CITIES = 55
+    CITIES = 10
 
 # get a random subgraph of the full cities graph
-graph = utils.random_city_subgraph(cities.get_city_graph_safely(), CITIES)
+graph = utils.random_subgraph(cities.get_city_graph_safely(), CITIES)
 # get the city positions for all nodes in the graph
 city_positions = cities.get_city_positions_safely()
 
@@ -25,11 +25,12 @@ def draw_solution():
     Draws the solution graph
     """
     # tell networkx to generate pyplot graph
-    nx.draw_networkx(graph, pos=city_positions, with_labels=True)
+    nx.draw_networkx(graph, pos=city_positions, style='dashed', with_labels=True)
     # set the window to full-screen
     manager = plt.get_current_fig_manager()
     manager.resize(*manager.window.maxsize())
     # display the window
+    plt.title("Total distance: " + str(int(cities.compute_total_distance(graph))) + " miles")
     plt.show()
 
 def findAngle(node1, node2):
@@ -54,7 +55,6 @@ def findAngle(node1, node2):
             quadrant = 3
     elif delta_y < 0 :
         quadrant = 4
-        64
     # get the inverse tangent of [opposite/adjacent],
     # correcting angle based on quadrant
     theta = math.degrees(math.atan(delta_y/delta_x))
@@ -118,37 +118,6 @@ def find_most_western_vertex():
             furthest_node = node
     return furthest_node
 
-def find_closest_outer_edge(inner_node):
-    """
-    Finds the closest edge on the existing circuit
-    to the given node
-    """
-    
-    # compare every visited edge
-    closest_edge = None
-    shortest_dist = None
-    for edge in visited_edges:
-        distance_to_edge = utils.find_shortest_distance(edge, city_positions[inner_node])
-        if shortest_dist is None or distance_to_edge < shortest_dist:
-            shortest_dist = distance_to_edge
-            closest_edge = edge
-    return closest_edge
-
-def find_closest_inner_vertex(outer_edge):
-    """
-    Finds the closest inner vertex inside the existing circuit
-    to the given circuit edge
-    """
-    closest_vertex = None
-    shortest_dist = None
-    #compare all inner vertices
-    for inner_node in [node for node in graph.nodes() if node not in visited_cities]:
-        distance_to_edge = utils.find_shortest_distance(outer_edge, city_positions[inner_node])
-        if shortest_dist is None or distance_to_edge < shortest_dist:
-            shortest_dist = distance_to_edge
-            closest_vertex = inner_node
-    return closest_vertex, shortest_dist
-
 def choose_best_edge_deformation(inner_vertex):
     """
     In a list of edges, find the minimal-distance edge-deformation for a vertex 
@@ -157,14 +126,14 @@ def choose_best_edge_deformation(inner_vertex):
     best_edge = None
     for edge in visited_edges:
         # the positions of the two vertices of the edge
-        P1 = city_positions[edge[0]]
-        P2 = city_positions[edge[1]]
+        position1 = city_positions[edge[0]]
+        position2 = city_positions[edge[1]]
         # the inner vertex position
-        V = city_positions[inner_vertex]
+        vertex_position = city_positions[inner_vertex]
         # find the distance between the two points of the edge
-        original_dist = utils.distance(P1, P2)
+        original_dist = utils.distance(position1, position2)
         # find the sum of the distances between the inner vertex and the edge's vertices
-        new_dist = utils.distance(P1, V) + utils.distance(P2, V)
+        new_dist = utils.distance(position1, vertex_position) + utils.distance(position2, vertex_position)
         # find the change in distance after deformation
         delta_dist = new_dist - original_dist
         if best_dist is None or delta_dist < best_dist:
@@ -172,9 +141,9 @@ def choose_best_edge_deformation(inner_vertex):
             best_edge = edge
     return best_edge, best_dist
         
-def solve_salesman():
+def apply_salesman():
     """
-    Perform the algorithm, presenting the resulting solution plot at finish.
+    Apply the solution algorithm to the globally-stored graph
     """
     global visited_edges
     # select the first node
@@ -233,7 +202,6 @@ def solve_salesman():
         visited_edges.append((next_best_vertex, v))
         # add the new vertex to our visited cities
         visited_cities.append(next_best_vertex)
-
-    draw_solution()
     
-solve_salesman()
+apply_salesman()
+draw_solution()
