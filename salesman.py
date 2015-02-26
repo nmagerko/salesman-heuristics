@@ -30,7 +30,7 @@ def draw_solution():
     manager = plt.get_current_fig_manager()
     manager.resize(*manager.window.maxsize())
     # display the window
-    plt.title("Total distance: " + str(int(cities.compute_total_distance(graph))) + " miles")
+    plt.title("TOTAL DISTANCE: " + str(int(cities.compute_total_distance(graph))) + " miles")
     plt.show()
 
 def findAngle(node1, node2):

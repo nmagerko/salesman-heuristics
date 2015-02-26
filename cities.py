@@ -109,7 +109,7 @@ def get_city_graph_safely():
     if not city_graph:
         city_graph = nx.Graph()
         for data in json.loads(cityDataRaw):
-            cityName = ", ".join((data['city'], data['state']))
+            cityName = ", ".join((data['city'].title(), data['state']))
             cityPos = (data['longitude'], data['latitude'],)
             city_graph_pos[cityName] = cityPos
             
