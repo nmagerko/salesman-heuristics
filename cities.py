@@ -91,7 +91,7 @@ def add_city_edges():
         for non_neighbor in non_neighbors:
             weight = utils.distance(city_graph_pos[node], \
                                     city_graph_pos[non_neighbor])
-            city_graph.add_edge(node, non_neighbor, weight=weight)
+            city_graph.add_edge(node, non_neighbor, weight=weight);
 
 def get_city_graph_safely():
     """
@@ -103,10 +103,10 @@ def get_city_graph_safely():
         city_graph = nx.Graph()
         for data in json.loads(cityDataRaw):
             cityName = ", ".join((data['city'], data['state']))
-            city_graph.add_node(cityName)
-
             cityPos = (data['longitude'], data['latitude'],)
             city_graph_pos[cityName] = cityPos
+            
+            city_graph.add_node(cityName)
         add_city_edges()
     return city_graph
 

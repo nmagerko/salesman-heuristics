@@ -16,3 +16,10 @@ def random_city_subgraph(city_graph, number_of_nodes):
     subgraph_nodes = random.sample(all_nodes, number_of_nodes)
 
     return city_graph.subgraph(subgraph_nodes)
+
+def find_shortest_edge(graph):
+    shortest_edge = None
+    for edge in graph.edges():
+        if shortest_edge is None or edge['weight'] < shortest_edge['weight']:
+            shortest_edge=edge;
+    return shortest_edge;

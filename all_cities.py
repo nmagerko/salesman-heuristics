@@ -9,7 +9,7 @@ def save_graph(G, positions):
     # save graph
     # plt.savefig("output/all_cities.png")
     plt.show()
-q
+
 # draw example
 subgraph = utils.random_city_subgraph(cities.get_city_graph_safely(), 6)
 city_positions = cities.get_city_positions_safely()
