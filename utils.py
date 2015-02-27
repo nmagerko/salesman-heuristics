@@ -5,25 +5,19 @@ import networkx as nx
 import random
 
 MILES_PER_DEGREE = 69
-NUM_FIGURES = 0;
 
-def draw_graph(graph, city_positions):
+def draw_graph(graph, city_positions, graph_type):
     """
     Draws a city graph
     """
-    global NUM_FIGURES
     
-    plt.figure(NUM_FIGURES)
+    plt.figure(graph_type.upper())
     # tell networkx to generate pyplot graph
     nx.draw_networkx(graph, pos=city_positions, style='dashed', with_labels=True)
-    # set the window to full-screen
-    manager = plt.get_current_fig_manager()
-    manager.resize(*manager.window.maxsize())
     # display the window
-    plt.title("APPROXIMATE TOTAL DISTANCE: " + str(int(cities.compute_total_distance(graph))) + " miles")
+    plt.title("APPROXIMATE TOTAL DISTANCE: {0} miles".format(str(int(cities.compute_total_distance(graph)))))
     plt.xlabel('Latitude')
     plt.ylabel('Longitude')
-    NUM_FIGURES += 1
 
 def show_graphs():
     plt.show()
