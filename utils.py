@@ -1,18 +1,25 @@
 import math
 import random
 
-def distance(node1, node2):
-    return math.sqrt((node1[0] - node2[0])**2 + (node1[1] - node2[1])**2)
+MILES_PER_DEGREE = 69
 
-def total_weight(edges):
-    total = 0
-    for edge in edges:
-        total += edge[2]['weight']
-
-    return total
-
-def random_city_subgraph(city_graph, number_of_nodes):
-    all_nodes = set(city_graph.nodes())
+def random_subgraph(graph, number_of_nodes):
+    """
+    Creates a random subgraph from the given graph
+    """
+    all_nodes = set(graph.nodes())
     subgraph_nodes = random.sample(all_nodes, number_of_nodes)
 
-    return city_graph.subgraph(subgraph_nodes)
+    return graph.subgraph(subgraph_nodes)
+
+def distance(node1, node2):
+    """
+    Finds the distance between node1 and node2
+    """
+    return math.sqrt((node1[0] - node2[0])**2 + (node1[1] - node2[1])**2)
+
+def distance_miles(node1, node2):
+    """
+    Finds the distance between node1 and node2 in miles
+    """
+    return math.sqrt((MILES_PER_DEGREE * (node1[0] - node2[0]))**2 + (MILES_PER_DEGREE * (node1[1] - node2[1]))**2)
