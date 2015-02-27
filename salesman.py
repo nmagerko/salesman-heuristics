@@ -176,10 +176,15 @@ def apply_salesman():
     
 print("Beginning heuristic...")
 apply_salesman()
-utils.draw_graph(graph, city_positions)
+utils.draw_graph(graph, city_positions, 'Heuristic')
 
 print("\n" + "Beginning brute-force...")
+<<<<<<< HEAD
 #lightest_graph = bruteforce.bruteforce(graph, city_positions)
 #utils.draw_graph(lightest_graph, city_positions)
+=======
+lightest_graph = bruteforce.bruteforce(graph, city_positions)
+utils.draw_graph(lightest_graph, city_positions, 'Brute-Force')
+>>>>>>> a91ce3c2b71c89b5279517a4e6cad934fa8e4f12
 
 show_graphs()
