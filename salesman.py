@@ -4,12 +4,13 @@ import math
 import networkx as nx
 import utils
 import sys
+from utils import show_graphs
 
 # the number of cities on our itinerary
 if len(sys.argv) > 1:
     CITIES = int(sys.argv[1])
 else:
-    CITIES = 10
+    CITIES = 8
 
 # get a random subgraph of the full cities graph
 graph = utils.random_subgraph(cities.get_city_graph_safely(), CITIES)
@@ -180,3 +181,5 @@ utils.draw_graph(graph, city_positions)
 print("\n" + "Beginning brute-force...")
 lightest_graph = bruteforce.bruteforce(graph, city_positions)
 utils.draw_graph(lightest_graph, city_positions)
+
+show_graphs()
