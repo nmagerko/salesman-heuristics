@@ -4,7 +4,6 @@ import math
 import networkx as nx
 import utils
 import sys
-from utils import show_graphs
 
 # the number of cities on our itinerary
 if len(sys.argv) > 1:
@@ -179,12 +178,7 @@ apply_salesman()
 utils.draw_graph(graph, city_positions, 'Heuristic')
 
 print("\n" + "Beginning brute-force...")
-<<<<<<< HEAD
 #lightest_graph = bruteforce.bruteforce(graph, city_positions)
 #utils.draw_graph(lightest_graph, city_positions)
-=======
-lightest_graph = bruteforce.bruteforce(graph, city_positions)
-utils.draw_graph(lightest_graph, city_positions, 'Brute-Force')
->>>>>>> a91ce3c2b71c89b5279517a4e6cad934fa8e4f12
 
-show_graphs()
+utils.show_graphs()
