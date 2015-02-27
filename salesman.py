@@ -1,8 +1,8 @@
+import bruteforce
 import cities
-import matplotlib.pyplot as plt
+import math
 import networkx as nx
 import utils
-import math
 import sys
 
 # the number of cities on our itinerary
@@ -20,21 +20,6 @@ city_positions = cities.get_city_positions_safely()
 visited_cities = []
 visited_edges = []
 
-def draw_solution():
-    """
-    Draws the solution graph
-    """
-    # tell networkx to generate pyplot graph
-    nx.draw_networkx(graph, pos=city_positions, style='dashed', with_labels=True)
-    # set the window to full-screen
-    manager = plt.get_current_fig_manager()
-    manager.resize(*manager.window.maxsize())
-    # display the window
-    plt.title("APPROXIMATE TOTAL DISTANCE: " + str(int(cities.compute_total_distance(graph))) + " miles")
-    plt.xlabel('Latitude')
-    plt.ylabel('Longitude')
-    plt.show()
-
 def findAngle(node1, node2):
     """
     Finds the angle between node1 and node2
@@ -43,12 +28,12 @@ def findAngle(node1, node2):
     # where we want to go
     initial_position = city_positions[node1]
     next_position = city_positions[node2]
-    
+
     # find the distance between the cities in each dimension
     delta_x = next_position[0] - initial_position[0]
     delta_y = next_position[1] - initial_position[1]
-    
-    # decide on the quadrant, based on the signs of delta_x 
+
+    # decide on the quadrant, based on the signs of delta_x
     # and delta_y
     quadrant = 1
     if delta_x < 0:
@@ -57,6 +42,7 @@ def findAngle(node1, node2):
             quadrant = 3
     elif delta_y < 0 :
         quadrant = 4
+
     # get the inverse tangent of [opposite/adjacent],
     # correcting angle based on quadrant
     theta = math.degrees(math.atan(delta_y/delta_x))
@@ -67,17 +53,18 @@ def findAngle(node1, node2):
 def determine_best_radial_neighbor(node):
     """
     Given some node in the graph, find the next node in the
-    outer circuit by comparing the angles to all other nodes in 
+    outer circuit by comparing the angles to all other nodes in
     the graph, choosing the smallest difference between the current
     angle
     """    
+    
     # determine the angle in which we are traveling along outer circuit
     # if this is the first point on the circuit, start directly south
     angle = 270.0
     if visited_edges:
         last_edge = visited_edges[-1]
         angle = findAngle(last_edge[0],last_edge[1])
-    
+
     # pick the node to add to the outer circuit by finding the node with
     # the smallest difference in angle from [angle]
     next_edge = None
@@ -93,7 +80,7 @@ def determine_best_radial_neighbor(node):
         if smallest_angle is None or possible_next_angle < smallest_angle:
             next_edge = (node, potential_neighbor)
             smallest_angle = possible_next_angle
-            
+
     # return the next edge to add to the solution   
     return next_edge
 
@@ -103,7 +90,7 @@ def find_most_western_vertex():
     finding the node with the most negative x-valued
     position
     """
-    
+
     # compare every node
     furthest_node = None
     furthest_x= None
@@ -159,31 +146,37 @@ def apply_salesman():
         visited_edges.append((u, v))
         print("NEXT CITY: " + current_city)
     
-    # Connect the inner vertices
+    # connect the inner vertices
     while len(visited_cities) < CITIES: 
         next_best_vertex = None
         shortest_dist = None
         deformed_edge = None
         # find the best edge deformation for each vertex and compare.
-        # The smallest change in distance for an edge deformation is the best choice
+        # the smallest change in distance for an edge deformation is the best choice
         for inner_vertex in [node for node in graph.nodes() if node not in visited_cities]:
             edge, dist = choose_best_edge_deformation(inner_vertex)
             if shortest_dist is None or dist < shortest_dist:
                 shortest_dist = dist
                 next_best_vertex = inner_vertex
                 deformed_edge = edge
+                
         u, v = deformed_edge
         # remove the edge we are going to deform
         graph.remove_edge(v, u)
+        
         # remove it from the visited edges as well
         visited_edges = [edge for edge in visited_edges if edge != (u, v) and edge != (v, u)]
-        # add the edges that occur from the edge deformation
+        
         graph.add_edge(next_best_vertex, u)
         graph.add_edge(next_best_vertex, v)
         visited_edges.append((next_best_vertex, u))
         visited_edges.append((next_best_vertex, v))
-        # add the new vertex to our visited cities
         visited_cities.append(next_best_vertex)
     
+print("Beginning heuristic...")
 apply_salesman()
-draw_solution()
+utils.draw_graph(graph, city_positions)
+
+print("\n" + "Beginning brute-force...")
+lightest_graph = bruteforce.bruteforce(graph, city_positions)
+utils.draw_graph(lightest_graph, city_positions)
