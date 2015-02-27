@@ -10,7 +10,7 @@ from utils import show_graphs
 if len(sys.argv) > 1:
     CITIES = int(sys.argv[1])
 else:
-    CITIES = 8
+    CITIES = 50
 
 # get a random subgraph of the full cities graph
 graph = utils.random_subgraph(cities.get_city_graph_safely(), CITIES)
@@ -179,7 +179,7 @@ apply_salesman()
 utils.draw_graph(graph, city_positions)
 
 print("\n" + "Beginning brute-force...")
-lightest_graph = bruteforce.bruteforce(graph, city_positions)
-utils.draw_graph(lightest_graph, city_positions)
+#lightest_graph = bruteforce.bruteforce(graph, city_positions)
+#utils.draw_graph(lightest_graph, city_positions)
 
 show_graphs()
