@@ -6,9 +6,10 @@ def distance(node1, node2):
     return math.sqrt((node1[0] - node2[0])**2 + (node1[1] - node2[1])**2)
 
 def total_weight(edges):
+    city_positions = cities.get_city_positions_safely()
     total = 0
     for edge in edges:
-        total += edge[2]['weight']
+        total += distance(city_positions[edge[0]],city_positions[edge[1]])
 
     return total
 
