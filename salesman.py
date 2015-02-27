@@ -261,7 +261,7 @@ def bruteforce():
         for perm in itertools.permutations(G.nodes(),len(G.nodes())):
             H = nx.Graph()
             H.add_nodes_from(perm)
-            for i, node in enumerate(perm):
+            for i in range(len(perm)):
                 if(i + 1 < len(perm)):
                     H.add_edge(perm[i],perm[i+1])
             H.add_node(node)
