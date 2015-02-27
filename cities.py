@@ -89,17 +89,6 @@ def compute_total_distance(city_graph):
     
     return total_distance
 
-def add_city_edges():
-    """
-    Adds edges to city graph
-    """
-    global city_graph
-    nodes_to_connect = nx.nodes(city_graph)
-    for node in nodes_to_connect:
-        non_neighbors = nx.non_neighbors(city_graph, node)
-        for non_neighbor in non_neighbors:
-            city_graph.add_edge(node, non_neighbor);
-
 def get_city_graph_safely():
     """
     Provides the city_graph, generating it if the graph does not already exist
@@ -114,7 +103,6 @@ def get_city_graph_safely():
             city_graph_pos[cityName] = cityPos
             
             city_graph.add_node(cityName)
-        add_city_edges()
     return city_graph
 
 def get_city_positions_safely():

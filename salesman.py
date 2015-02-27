@@ -30,7 +30,9 @@ def draw_solution():
     manager = plt.get_current_fig_manager()
     manager.resize(*manager.window.maxsize())
     # display the window
-    plt.title("TOTAL DISTANCE: " + str(int(cities.compute_total_distance(graph))) + " miles")
+    plt.title("APPROXIMATE TOTAL DISTANCE: " + str(int(cities.compute_total_distance(graph))) + " miles")
+    plt.xlabel('Latitude')
+    plt.ylabel('Longitude')
     plt.show()
 
 def findAngle(node1, node2):
@@ -68,10 +70,7 @@ def determine_best_radial_neighbor(node):
     outer circuit by comparing the angles to all other nodes in 
     the graph, choosing the smallest difference between the current
     angle
-    """
-    # get edges incident to the given node
-    incident_edges = graph.edges(node)
-    
+    """    
     # determine the angle in which we are traveling along outer circuit
     # if this is the first point on the circuit, start directly south
     angle = 270.0
@@ -83,23 +82,20 @@ def determine_best_radial_neighbor(node):
     # the smallest difference in angle from [angle]
     next_edge = None
     smallest_angle = None
-    for edge in incident_edges:
+    for potential_neighbor in nx.non_neighbors(graph, node):
         # find the angle between the upcoming node and this node
-        possible_next_angle = findAngle(node, edge[1])
+        possible_next_angle = findAngle(node, potential_neighbor)
         
         # ensure that angle is positive
         if possible_next_angle < angle:
             possible_next_angle += 360
         # update the smallest angle and next edge if appropriate
         if smallest_angle is None or possible_next_angle < smallest_angle:
-            next_edge = edge
+            next_edge = (node, potential_neighbor)
             smallest_angle = possible_next_angle
             
-    # return a tuple of the next edge, and all other edges excluding the next edge
-    # and those edges connected to visited cities
-    # the unused edges should be removed immediately upon return        
-    return (next_edge, [rmv for rmv in incident_edges if rmv != next_edge \
-                        and rmv[1] not in visited_cities])
+    # return the next edge to add to the solution   
+    return next_edge
 
 def find_most_western_vertex():
     """
@@ -149,33 +145,19 @@ def apply_salesman():
     # select the first node
     current_city = find_most_western_vertex()
     print("INITIAL CITY: " + current_city)
-    initial_city_nearest_edges = None
 
     # continue if we haven't visited any cities, or if we haven't
     # formed the outer circuit
     while len(visited_cities) == 0 or current_city!=visited_cities[0]:
         visited_cities.append(current_city)
         
-        # get the possible edges to take, and the ones we can remove
-        best_edge, rmv = determine_best_radial_neighbor(current_city)
-        if len(visited_cities) > 1:
-            graph.remove_edges_from(rmv)
-        else:
-            # Keep the initial city's edges for now;
-            # we don't want to remove the last edge 
-            # of the circuit by mistake
-            initial_city_nearest_edges=rmv
+        # get the next best edge for the outer circuit
+        u, v = determine_best_radial_neighbor(current_city)
+        graph.add_edge(u, v)
 
-        current_city = best_edge[1]
-        visited_edges.append(best_edge)
+        current_city = v
+        visited_edges.append((u, v))
         print("NEXT CITY: " + current_city)
-    # Now that we found the final circuit edge, remove the edges of the first city that we saved.
-    graph.remove_edges_from([rmv for rmv in initial_city_nearest_edges if  rmv[1] != visited_cities[1] \
-    and rmv[1]!= visited_cities[-1]])
-    # Also, remove the edges of all of the inner vertices. They're unimportant now.
-    for vertex in graph.nodes():
-        if vertex not in visited_cities:
-            graph.remove_edges_from(graph.edges(vertex))
     
     # Connect the inner vertices
     while len(visited_cities) < CITIES: 
