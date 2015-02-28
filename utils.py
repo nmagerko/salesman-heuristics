@@ -8,20 +8,20 @@ MILES_PER_LATITUDE_DEGREE = 68.71
 MILES_PER_LONGITUDE_DEGREE = 69.17 
 NUM_FIGURES = 0;
 
-america_image = plt.imread('america2.png')    # Open image as Pillow image object
+america_image = plt.imread('america1.png')    # Open image
 
 
 def draw_graph(graph, city_positions, graph_type):
     """
     Draws a city graph
     """
-    plt.figure(NUM_FIGURES)
+    plt.figure(graph_type.upper())
     plt.imshow(america_image, zorder=0, extent=[-125, -67, 25, 50.5])
     # tell networkx to generate pyplot graph
-    nx.draw_networkx(graph, pos=city_positions, style='dashed', with_labels=True)
+    nx.draw_networkx(graph, pos=city_positions, style='solid', with_labels=True)
     # set the window to full-screen
     manager = plt.get_current_fig_manager()
-#    manager.resize(*manager.window.maxsize())
+    manager.resize(*manager.window.maxsize())
     # display the window
     plt.title("APPROXIMATE TOTAL DISTANCE: {0} miles".format(str(int(cities.compute_total_distance(graph)))))
     plt.xlabel('Latitude')
