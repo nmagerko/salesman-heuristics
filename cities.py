@@ -76,6 +76,8 @@ city_graph = None
 # the positions of the cities (longitude, latitude)
 city_graph_pos = {}
 
+scale_adjuster = 1.2
+
 def compute_total_distance(city_graph):
     """
     Computes the total distance of a city graph

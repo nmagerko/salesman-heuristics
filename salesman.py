@@ -4,12 +4,13 @@ import math
 import networkx as nx
 import utils
 import sys
+import anim
 
 # the number of cities on our itinerary
 if len(sys.argv) > 1:
     CITIES = int(sys.argv[1])
 else:
-    CITIES = 8
+    CITIES = 64
 
 # get a random subgraph of the full cities graph
 graph = utils.random_subgraph(cities.get_city_graph_safely(), CITIES)
@@ -145,6 +146,7 @@ def apply_salesman():
         current_city = v
         visited_edges.append((u, v))
         print("NEXT CITY: " + current_city)
+        anim.add_graph(graph)
     
     # connect the inner vertices
     while len(visited_cities) < CITIES: 
@@ -172,13 +174,15 @@ def apply_salesman():
         visited_edges.append((next_best_vertex, u))
         visited_edges.append((next_best_vertex, v))
         visited_cities.append(next_best_vertex)
+        anim.add_graph(graph)
     
 print("Beginning heuristic...")
 apply_salesman()
-utils.draw_graph(graph, city_positions, 'Heuristic')
+#utils.draw_graph(graph, city_positions, 'Heuristic')
+anim.show_graphs()
 
 print("\n" + "Beginning brute-force...")
-lightest_graph = bruteforce.bruteforce(graph, city_positions)
-utils.draw_graph(lightest_graph, city_positions, 'Bruteforce')
+# lightest_graph = bruteforce.bruteforce(graph, city_positions)
+# utils.draw_graph(lightest_graph, city_positions, 'Bruteforce')
 
-utils.show_graphs()
+#utils.show_graphs()
