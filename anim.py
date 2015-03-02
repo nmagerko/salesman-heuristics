@@ -6,7 +6,7 @@ import networkx as nx
 GRAPH_LIST = []
 america_image = plt.imread('america1.png')    # Open image
 
-fig = plt.figure(num='HEURISTIC', figsize=(20,20))
+fig = plt.figure(num='HEURISTIC', figsize=(10,8))
 ax1 = fig.add_subplot(111)
 #     
 #     # tell networkx to generate pyplot graph

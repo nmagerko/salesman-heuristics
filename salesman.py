@@ -1,20 +1,22 @@
+import argparse
 import bruteforce
 import cities
 import math
 import networkx as nx
 import utils
-import sys
 import anim
-import time
 
-#Whether we want to animate or not. If not, we will run our algorithm and bruteforce
-ANIMATE = False
+# set up argument parsing
+parser = argparse.ArgumentParser(description='Generate solutions to the Traveling Salesman Problem')
+parser.add_argument('cities', type=int, nargs='?', default=8, help='the number of cities in the itinerary')
+parser.add_argument('--no-animate', action='store_false', default=True, help='turns off animation and runs brute-force silution simultaneously')
 
+args = parser.parse_args()
+
+# whether we want to animate or not. If not, we will run our algorithm and bruteforce
+NO_ANIMATE = args.no_animate
 # the number of cities on our itinerary
-if len(sys.argv) > 1:
-    CITIES = int(sys.argv[1])
-else:
-    CITIES = 8
+CITIES = args.cities
 
 # get a random subgraph of the full cities graph
 graph = utils.random_subgraph(cities.get_city_graph_safely(), CITIES)
@@ -24,8 +26,9 @@ city_positions = cities.get_city_positions_safely()
 # keep track of which cities and edges we've included in our solution
 visited_cities = []
 visited_edges = []
+    
 
-def findAngle(node1, node2):
+def find_angle(node1, node2):
     """
     Finds the angle between node1 and node2
     """
@@ -68,7 +71,7 @@ def determine_best_radial_neighbor(node):
     angle = 270.0
     if visited_edges:
         last_edge = visited_edges[-1]
-        angle = findAngle(last_edge[0],last_edge[1])
+        angle = find_angle(last_edge[0],last_edge[1])
 
     # pick the node to add to the outer circuit by finding the node with
     # the smallest difference in angle from [angle]
@@ -76,7 +79,7 @@ def determine_best_radial_neighbor(node):
     smallest_angle = None
     for potential_neighbor in nx.non_neighbors(graph, node):
         # find the angle between the upcoming node and this node
-        possible_next_angle = findAngle(node, potential_neighbor)
+        possible_next_angle = find_angle(node, potential_neighbor)
         
         # ensure that angle is positive
         if possible_next_angle < angle:
@@ -180,14 +183,14 @@ def apply_salesman():
         visited_cities.append(next_best_vertex)
         anim.add_graph(graph)
     
-print("Beginning heuristic...")
+print("Heuristic:")
 apply_salesman()
 
-if ANIMATE is True:
+if not NO_ANIMATE:
     anim.show_graphs()
 else:
     utils.draw_graph(graph, city_positions, 'Heuristic')
-    print("\n" + "Beginning brute-force...")
+    print("\n" + "Brute-force:")
     lightest_graph = bruteforce.bruteforce(graph, city_positions)
     utils.draw_graph(lightest_graph, city_positions, 'Bruteforce')
     utils.show_graphs()

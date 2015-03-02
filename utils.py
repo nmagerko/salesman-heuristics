@@ -15,16 +15,13 @@ def draw_graph(graph, city_positions, graph_type):
     Draws a city graph
     """
     #Creates a new figure. The 'figsize' argument determines the size of the window.
-    fig = plt.figure(num=graph_type.upper(), figsize=(8,10))
+    fig = plt.figure(num=graph_type.upper(), figsize=(10,8))
     ax1 = fig.add_subplot(111)
     ax1.imshow(america_image, zorder=0, extent=[-125, -67, 25, 50.5])
     ax1.set_aspect(1.3)
     
     # tell networkx to generate pyplot graph
     nx.draw_networkx(graph, pos=city_positions, style='solid', with_labels=True)
-    # set the window to full-screen
-    #manager = plt.get_current_fig_manager()
-    #manager.resize(*manager.window.maxsize())
     # display the window
     plt.title("APPROXIMATE TOTAL DISTANCE: {0} miles".format(str(int(cities.compute_total_distance(graph)))))
     plt.xlabel('Longitude')
