@@ -9,7 +9,7 @@ import anim
 # set up argument parsing
 parser = argparse.ArgumentParser(description='Generate solutions to the Traveling Salesman Problem')
 parser.add_argument('cities', type=int, nargs='?', default=8, help='the number of cities in the itinerary')
-parser.add_argument('--no-animate', action='store_false', default=True, help='turns off animation and runs brute-force silution simultaneously')
+parser.add_argument('--no-animate', action='store_false', default=True, help='turns off animation and runs brute-force solution simultaneously')
 
 args = parser.parse_args()
 
