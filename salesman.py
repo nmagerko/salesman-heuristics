@@ -9,7 +9,7 @@ import anim
 # set up argument parsing
 parser = argparse.ArgumentParser(description='Generate solutions to the Traveling Salesman Problem')
 parser.add_argument('cities', type=int, nargs='?', default=8, help='the number of cities in the itinerary')
-parser.add_argument('--no-animate', action='store_false', default=True, help='turns off animation and runs brute-force solution simultaneously')
+parser.add_argument('--no-animate', action='store_true', default=False, help='turns off animation and runs brute-force solution simultaneously')
 
 args = parser.parse_args()
 
@@ -186,11 +186,12 @@ def apply_salesman():
 print("Heuristic:")
 apply_salesman()
 
-if not NO_ANIMATE:
-    anim.show_graphs()
-else:
+if NO_ANIMATE:
     utils.draw_graph(graph, city_positions, 'Heuristic')
+    
     print("\n" + "Brute-force:")
     lightest_graph = bruteforce.bruteforce(graph, city_positions)
     utils.draw_graph(lightest_graph, city_positions, 'Bruteforce')
     utils.show_graphs()
+else:
+    anim.show_graphs()
