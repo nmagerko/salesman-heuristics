@@ -29,6 +29,7 @@ def draw_graph(graph, city_positions, graph_type):
     plt.title("APPROXIMATE TOTAL DISTANCE: {0} miles".format(str(int(cities.compute_total_distance(graph)))))
     plt.xlabel('Longitude')
     plt.ylabel('Latitude')
+    plt.show(block=False)
 
 def show_graphs():
     plt.show()
