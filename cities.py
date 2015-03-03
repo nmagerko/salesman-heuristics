@@ -71,27 +71,25 @@ Springs", "state":"CO", "latitude":38.852, "longitude":-104.765 }, {\
 "city":"SAINT LOUIS", "state":"MO", "latitude":38.635, "longitude":-90.285 }, {\
 "city":"FLOYD", "state":"VA", "latitude":36.91, "longitude":-80.309 }]'
 
-### If anyone knows how to create a singleton easily in Python, feel free
-### to implement it so that we don't have to use globals
-
 # the graph of the cities
 city_graph = None
 # the positions of the cities (longitude, latitude)
 city_graph_pos = {}
 
-def add_city_edges():
+scale_adjuster = 1.2
+
+def compute_total_distance(city_graph):
     """
-    Adds weighted edges to city graph
+    Computes the total distance of a city graph
+    in estimated miles
     """
-    global city_graph
-    global city_graph_pos
-    nodes_to_connect = nx.nodes(city_graph)
-    for node in nodes_to_connect:
-        non_neighbors = nx.non_neighbors(city_graph, node)
-        for non_neighbor in non_neighbors:
-            weight = utils.distance(city_graph_pos[node], \
-                                    city_graph_pos[non_neighbor])
-            city_graph.add_edge(node, non_neighbor, weight=weight)
+    total_distance = 0.0
+    for edge in city_graph.edges():
+        global city_graph_pos
+        total_distance += utils.distance_miles(city_graph_pos[edge[0]], \
+                                               city_graph_pos[edge[1]])
+    
+    return total_distance
 
 def get_city_graph_safely():
     """
@@ -102,12 +100,11 @@ def get_city_graph_safely():
     if not city_graph:
         city_graph = nx.Graph()
         for data in json.loads(cityDataRaw):
-            cityName = ", ".join((data['city'], data['state']))
-            city_graph.add_node(cityName)
-
+            cityName = ", ".join((data['city'].title(), data['state']))
             cityPos = (data['longitude'], data['latitude'],)
             city_graph_pos[cityName] = cityPos
-        add_city_edges()
+            
+            city_graph.add_node(cityName)
     return city_graph
 
 def get_city_positions_safely():
