@@ -5,6 +5,7 @@ import math
 import networkx as nx
 import utils
 import anim
+import time
 
 # set up argument parsing
 parser = argparse.ArgumentParser(description='Generate solutions to the Traveling Salesman Problem')
@@ -26,7 +27,7 @@ city_positions = cities.get_city_positions_safely()
 # keep track of which cities and edges we've included in our solution
 visited_cities = []
 visited_edges = []
-    
+
 
 def find_angle(node1, node2):
     """
@@ -64,8 +65,8 @@ def determine_best_radial_neighbor(node):
     outer circuit by comparing the angles to all other nodes in
     the graph, choosing the smallest difference between the current
     angle
-    """    
-    
+    """
+
     # determine the angle in which we are traveling along outer circuit
     # if this is the first point on the circuit, start directly south
     angle = 270.0
@@ -80,7 +81,7 @@ def determine_best_radial_neighbor(node):
     for potential_neighbor in nx.non_neighbors(graph, node):
         # find the angle between the upcoming node and this node
         possible_next_angle = find_angle(node, potential_neighbor)
-        
+
         # ensure that angle is positive
         if possible_next_angle < angle:
             possible_next_angle += 360
@@ -89,7 +90,7 @@ def determine_best_radial_neighbor(node):
             next_edge = (node, potential_neighbor)
             smallest_angle = possible_next_angle
 
-    # return the next edge to add to the solution   
+    # return the next edge to add to the solution
     return next_edge
 
 def find_most_western_vertex():
@@ -111,7 +112,7 @@ def find_most_western_vertex():
 
 def choose_best_edge_deformation(inner_vertex):
     """
-    In a list of edges, find the minimal-distance edge-deformation for a vertex 
+    In a list of edges, find the minimal-distance edge-deformation for a vertex
     """
     best_dist = None
     best_edge = None
@@ -131,7 +132,7 @@ def choose_best_edge_deformation(inner_vertex):
             best_dist = delta_dist
             best_edge = edge
     return best_edge, best_dist
-        
+
 def apply_salesman():
     """
     Apply the solution algorithm to the globally-stored graph
@@ -145,7 +146,7 @@ def apply_salesman():
     # formed the outer circuit
     while len(visited_cities) == 0 or current_city!=visited_cities[0]:
         visited_cities.append(current_city)
-        
+
         # get the next best edge for the outer circuit
         u, v = determine_best_radial_neighbor(current_city)
         graph.add_edge(u, v)
@@ -154,9 +155,9 @@ def apply_salesman():
         visited_edges.append((u, v))
         print("NEXT CITY: " + current_city)
         anim.add_graph(graph)
-    
+
     # connect the inner vertices
-    while len(visited_cities) < CITIES: 
+    while len(visited_cities) < CITIES:
         next_best_vertex = None
         shortest_dist = None
         deformed_edge = None
@@ -168,29 +169,33 @@ def apply_salesman():
                 shortest_dist = dist
                 next_best_vertex = inner_vertex
                 deformed_edge = edge
-                
+
         u, v = deformed_edge
         # remove the edge we are going to deform
         graph.remove_edge(v, u)
-        
+
         # remove it from the visited edges as well
         visited_edges = [edge for edge in visited_edges if edge != (u, v) and edge != (v, u)]
-        
+
         graph.add_edge(next_best_vertex, u)
         graph.add_edge(next_best_vertex, v)
         visited_edges.append((next_best_vertex, u))
         visited_edges.append((next_best_vertex, v))
         visited_cities.append(next_best_vertex)
         anim.add_graph(graph)
-    
+
 print("Heuristic:")
+start_time = time.time()
 apply_salesman()
+print("--- %s seconds ---" % (time.time() - start_time))
 
 if NO_ANIMATE:
     utils.draw_graph(graph, city_positions, 'Heuristic')
-    
+
     print("\n" + "Brute-force:")
+    start_time = time.time()
     lightest_graph = bruteforce.bruteforce(graph, city_positions)
+    print("--- %s seconds ---" % (time.time() - start_time))
     utils.draw_graph(lightest_graph, city_positions, 'Bruteforce')
     utils.show_graphs()
 else:
