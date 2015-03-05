@@ -10,19 +10,39 @@ import time
 # set up argument parsing
 parser = argparse.ArgumentParser(description='Generate solutions to the Traveling Salesman Problem')
 parser.add_argument('cities', type=int, nargs='?', default=8, help='the number of cities in the itinerary')
-parser.add_argument('--no-animate', action='store_true', default=False, help='turns off animation and runs brute-force solution simultaneously')
+parser.add_argument('--no-animate', action='store_true', default=False, help='turns off animation')
+parser.add_argument('--bruteforce', action='store_true', default=False, help='runs brute-force solution simultaneously')
+parser.add_argument('--random', action='store_true', default=False, help='generates a random graph')
+# parser.add_argument('--predef', metavar='N', type=int, help='uses a predefined graph')
 
 args = parser.parse_args()
 
-# whether we want to animate or not. If not, we will run our algorithm and bruteforce
+# whether we want to animate or not. If not, we will run our algorithm
 NO_ANIMATE = args.no_animate
 # the number of cities on our itinerary
 CITIES = args.cities
+# whether or not to bruteforce the ideal solution
+BRUTEFORCE = args.bruteforce
+
+RANDOM = args.random
+if(RANDOM):
+    print "disabling animation"
+    NO_ANIMATE = True
+# PREDEF = args.predef
+
+if(RANDOM and BRUTEFORCE):
+    print "Bruteforcing a random graph is not currently supported. Sorry."
+    exit(0)
 
 # get a random subgraph of the full cities graph
 graph = utils.random_subgraph(cities.get_city_graph_safely(), CITIES)
+
+
 # get the city positions for all nodes in the graph
 city_positions = cities.get_city_positions_safely()
+
+if(RANDOM):
+    graph, city_positions = utils.get_random_graph(CITIES)
 
 # keep track of which cities and edges we've included in our solution
 visited_cities = []
@@ -134,6 +154,7 @@ def choose_best_edge_deformation(inner_vertex):
     return best_edge, best_dist
 
 def apply_salesman():
+    anim.pos = city_positions
     """
     Apply the solution algorithm to the globally-stored graph
     """
@@ -190,13 +211,13 @@ apply_salesman()
 print("--- %s seconds ---" % (time.time() - start_time))
 
 if NO_ANIMATE:
-    utils.draw_graph(graph, city_positions, 'Heuristic')
-
-    print("\n" + "Brute-force:")
-    start_time = time.time()
-    lightest_graph = bruteforce.bruteforce(graph, city_positions)
-    print("--- %s seconds ---" % (time.time() - start_time))
-    utils.draw_graph(lightest_graph, city_positions, 'Bruteforce')
+    utils.draw_graph(graph, city_positions, 'Heuristic', rand=RANDOM)
+    if BRUTEFORCE:
+        print("\n" + "Brute-force:")
+        start_time = time.time()
+        lightest_graph = bruteforce.bruteforce(graph, city_positions)
+        print("--- %s seconds ---" % (time.time() - start_time))
+        utils.draw_graph(lightest_graph, city_positions, 'Bruteforce')
     utils.show_graphs()
 else:
     anim.show_graphs()

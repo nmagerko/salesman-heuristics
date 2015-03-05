@@ -78,7 +78,7 @@ city_graph_pos = {}
 
 scale_adjuster = 1.2
 
-def compute_total_distance(city_graph):
+def compute_total_distance(city_graph, positions=city_graph_pos):
     """
     Computes the total distance of a city graph
     in estimated miles
@@ -86,9 +86,9 @@ def compute_total_distance(city_graph):
     total_distance = 0.0
     for edge in city_graph.edges():
         global city_graph_pos
-        total_distance += utils.distance_miles(city_graph_pos[edge[0]], \
-                                               city_graph_pos[edge[1]])
-    
+        total_distance += utils.distance_miles(positions[edge[0]], \
+                                               positions[edge[1]])
+
     return total_distance
 
 def get_city_graph_safely():
@@ -103,7 +103,7 @@ def get_city_graph_safely():
             cityName = ", ".join((data['city'].title(), data['state']))
             cityPos = (data['longitude'], data['latitude'],)
             city_graph_pos[cityName] = cityPos
-            
+
             city_graph.add_node(cityName)
     return city_graph
 
